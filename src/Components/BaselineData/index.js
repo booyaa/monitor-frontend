@@ -1,10 +1,9 @@
 import React from "react";
 
 export default class BaselineData extends React.Component {
-  render() {
+  renderSummary() {
     return (
       <div>
-        <p data-test="title">{this.props.title}</p>
         <p data-test="summary-bidReference">
           {this.props.formData.summary.bidReference}
         </p>
@@ -38,6 +37,15 @@ export default class BaselineData extends React.Component {
         <p data-test="summary-descriptionOfWiderProjectDeliverables">
           {this.props.formData.summary.descriptionOfWiderProjectDeliverables}
         </p>
+      </div>
+    );
+  }
+
+  render() {
+    return (
+      <div>
+        <p data-test="title">{this.props.title}</p>
+        {this.renderSummary()}
       </div>
     );
   }
