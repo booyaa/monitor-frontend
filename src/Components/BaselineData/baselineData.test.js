@@ -3,8 +3,8 @@ import BaselineData from ".";
 import { shallow, mount } from "enzyme";
 
 class BaselinePage {
-  constructor(title, formData) {
-    this.page = shallow(<BaselineData title={title} formData={formData} />);
+  constructor(schema, data) {
+    this.page = shallow(<BaselineData schema={schema} data={data} />);
   }
 
   title() {
@@ -14,90 +14,597 @@ class BaselinePage {
   summary(section) {
     return this.page.find(`[data-test='summary-${section}']`).text();
   }
+
+  find(path) {
+    return this.page.find(path);
+  }
 }
 
 describe("Baseline Data", () => {
-  describe("Example 1", () => {
-    let title = "HIF Data";
-    let summary = {
-      bidReference: "1234",
-      projectTitle: "Project Cats",
-      leadAuthority: "Cat Mayor",
-      jointBidAreas: "Dog Hater",
-      projectDescription: "Down with the dogs",
-      greenOrBrownField: "Greenfield",
-      noOfHousingSites: "55",
-      totalArea: "67",
-      hifFundingAmount: "5000382910",
-      descriptionOfInfrastructure: "Really tall building",
-      descriptionOfWiderProjectDeliverables: "There will be some trees outside"
-    };
-    let formData = { summary: summary };
-    let page = new BaselinePage(title, formData);
+  describe("In a simple object", () => {
+    describe("Example 1", () => {
+      let page;
+      beforeEach(() => {
+        let schema = {
+          title: "HIF Data",
+          type: "object",
+          properties: {
+            firstItem: {
+              title: "One of many of your items",
+              type: "string"
+            }
+          }
+        };
+        let data = { firstItem: "This is number one " };
+        page = new BaselinePage(schema, data);
+      });
+      it("Displays the Project Name", () => {
+        expect(page.title()).toEqual("HIF Data");
+      });
 
-    it("Displays the Project Name", () => {
-      expect(page.title()).toEqual("HIF Data");
+      it("Displays a single string", () => {
+        expect(page.find("[data-test='firstItem']").text()).toEqual(
+          "This is number one "
+        );
+        expect(page.find("[data-test='secondItem']").length).toEqual(0);
+      });
+
+      it("Display the title for a single string", () => {
+        expect(page.find("[data-test='title-firstItem']").text()).toEqual(
+          "One of many of your items"
+        );
+      });
+
+      it("Displays two strings", () => {
+        let schema = {
+          title: "Title",
+          type: "object",
+          properties: {
+            firstItem: {
+              title: "an item",
+              type: "string"
+            },
+            secondItem: {
+              title: "another item",
+              type: "string"
+            }
+          }
+        };
+        let data = { firstItem: "First String", secondItem: "Second String" };
+        let page2 = new BaselinePage(schema, data);
+
+        expect(page2.find("[data-test='firstItem']").text()).toEqual(
+          "First String"
+        );
+        expect(page2.find("[data-test='secondItem']").text()).toEqual(
+          "Second String"
+        );
+      });
     });
 
-    it("Displays the Summary", () => {
-      expect(page.summary("bidReference")).toEqual("1234");
-      expect(page.summary("projectTitle")).toEqual("Project Cats");
-      expect(page.summary("leadAuthority")).toEqual("Cat Mayor");
-      expect(page.summary("jointBidAreas")).toEqual("Dog Hater");
-      expect(page.summary("projectDescription")).toEqual("Down with the dogs");
-      expect(page.summary("greenOrBrownField")).toEqual("Greenfield");
-      expect(page.summary("noOfHousingSites")).toEqual("55");
-      expect(page.summary("totalArea")).toEqual("67");
-      expect(page.summary("hifFundingAmount")).toEqual("5000382910");
-      expect(page.summary("descriptionOfInfrastructure")).toEqual(
-        "Really tall building"
+    describe("Example 2", () => {
+      let page;
+      beforeEach(() => {
+        let schema = {
+          title: "My House Building Project",
+          type: "object",
+          properties: {
+            secondItem: {
+              type: "string",
+              title: "a string"
+            }
+          }
+        };
+        let data = { secondItem: "This is number three " };
+        page = new BaselinePage(schema, data);
+      });
+      it("Displays the Project Name", () => {
+        expect(page.title()).toEqual("My House Building Project");
+      });
+
+      it("Displays a single string", () => {
+        expect(page.find("[data-test='secondItem']").text()).toEqual(
+          "This is number three "
+        );
+        expect(page.find("[data-test='firstItem']").length).toEqual(0);
+      });
+
+      it("Display the title for a single string", () => {
+        expect(page.find("[data-test='title-secondItem']").text()).toEqual(
+          "a string"
+        );
+      });
+
+      it("Displays two strings", () => {
+        let schema = {
+          title: "My House Building Project",
+          type: "object",
+          properties: {
+            anotherItem: {
+              type: "string",
+              title: "another title"
+            },
+            catItem: {
+              type: "string",
+              title: "cat title"
+            }
+          }
+        };
+        let data = { anotherItem: "Another One", catItem: "Cats!" };
+        let page = new BaselinePage(schema, data);
+
+        expect(page.find("[data-test='anotherItem']").text()).toEqual(
+          "Another One"
+        );
+        expect(page.find("[data-test='catItem']").text()).toEqual("Cats!");
+      });
+    });
+  });
+  describe("In a nested object", () => {
+    describe("Example 1", () => {
+      it("Displays the Summary", () => {
+        let schema = {
+          title: "Title of the Page",
+          type: "object",
+          properties: {
+            summary: {
+              title: "summary",
+              type: "object",
+              properties: {
+                bidReference: {
+                  type: "string",
+                  title: "Bid Reference"
+                },
+                projectTitle: {
+                  type: "string",
+                  title: "Project Reference"
+                }
+              }
+            }
+          }
+        };
+        let summary = {
+          bidReference: "1234",
+          projectTitle: "Project Cats"
+        };
+        let data = { summary };
+        let page = new BaselinePage(schema, data);
+        expect(page.find("[data-test='bidReference']").text()).toEqual("1234");
+        expect(page.find("[data-test='projectTitle']").text()).toEqual(
+          "Project Cats"
+        );
+      });
+    });
+    describe("Example 2", () => {
+      it("Displays the summary", () => {
+        let schema = {
+          title: "Main Title",
+          type: "object",
+          properties: {
+            overview: {
+              title: "viewing",
+              type: "object",
+              properties: {
+                hifFundingAmount: {
+                  type: "string",
+                  title: "Bid Reference"
+                },
+                descriptionOfInfrastructure: {
+                  type: "string",
+                  title: "Project Reference"
+                },
+                descriptionOfWiderProjectDeliverables: {
+                  type: "string",
+                  title: "descriptive"
+                }
+              }
+            }
+          }
+        };
+        let data = {
+          overview: {
+            hifFundingAmount: "9876543",
+            descriptionOfInfrastructure: "Giant cat box",
+            descriptionOfWiderProjectDeliverables: "Lots of scratching posts"
+          }
+        };
+        let page = new BaselinePage(schema, data);
+        expect(page.find("[data-test='hifFundingAmount']").text()).toEqual(
+          "9876543"
+        );
+        expect(
+          page.find("[data-test='descriptionOfInfrastructure']").text()
+        ).toEqual("Giant cat box");
+        expect(
+          page
+            .find("[data-test='descriptionOfWiderProjectDeliverables']")
+            .text()
+        ).toEqual("Lots of scratching posts");
+      });
+    });
+  });
+  describe("Mutiple nested objects", () => {
+    it("Displays a summary", () => {
+      let schema = {
+        title: "Title of the Page",
+        type: "object",
+        properties: {
+          summary: {
+            title: "summary",
+            type: "object",
+            properties: {
+              bidReference: {
+                type: "string",
+                title: "Bid Reference"
+              },
+              projectTitle: {
+                type: "string",
+                title: "Project Reference"
+              }
+            }
+          },
+          foo: {
+            title: "foo",
+            type: "object",
+            properties: {
+              bar: {
+                type: "string",
+                title: "bar title"
+              },
+              baz: {
+                type: "string",
+                title: "baz title"
+              }
+            }
+          }
+        }
+      };
+      let summary = {
+        bidReference: "1234",
+        projectTitle: "Project Cats"
+      };
+      let foo = {
+        bar: "Hello",
+        baz: "Goodbye"
+      };
+      let data = { summary, foo };
+      let page = new BaselinePage(schema, data);
+
+      expect(page.find("[data-test='bidReference']").text()).toEqual("1234");
+      expect(page.find("[data-test='projectTitle']").text()).toEqual(
+        "Project Cats"
       );
-      expect(page.summary("descriptionOfWiderProjectDeliverables")).toEqual(
-        "There will be some trees outside"
-      );
+      expect(page.find("[data-test='bar']").text()).toEqual("Hello");
+      expect(page.find("[data-test='baz']").text()).toEqual("Goodbye");
+    });
+  });
+  describe("Arrays", () => {
+    describe("Example 1", () => {
+      it("Can show data from within an array", () => {
+        let schema = {
+          title: "Title",
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              a: {
+                type: "string",
+                title: "A item"
+              },
+              b: {
+                type: "string",
+                title: "B item"
+              }
+            }
+          }
+        };
+        let data = [{ a: "Cat", b: "Dog" }, { a: "Rabbit", b: "Frog" }];
+        let page = new BaselinePage(schema, data);
+
+        expect(
+          page
+            .find("[data-test='a']")
+            .at(0)
+            .text()
+        ).toEqual("Cat");
+        expect(
+          page
+            .find("[data-test='a']")
+            .at(1)
+            .text()
+        ).toEqual("Rabbit");
+        expect(
+          page
+            .find("[data-test='b']")
+            .at(0)
+            .text()
+        ).toEqual("Dog");
+        expect(
+          page
+            .find("[data-test='b']")
+            .at(1)
+            .text()
+        ).toEqual("Frog");
+      });
+    });
+
+    describe("Example 2", () => {
+      it("Can show data from within an array", () => {
+        let schema = {
+          title: "Cats 4 Life",
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              meow: {
+                type: "string",
+                title: "Yes to meows"
+              },
+              whiskers: {
+                type: "string",
+                title: "Always whiskers"
+              }
+            }
+          }
+        };
+        let data = [
+          { meow: "mew", whiskers: "soft" },
+          { meow: "purr", whiskers: "bristly" }
+        ];
+        let page = new BaselinePage(schema, data);
+
+        expect(
+          page
+            .find("[data-test='meow']")
+            .at(0)
+            .text()
+        ).toEqual("mew");
+        expect(
+          page
+            .find("[data-test='meow']")
+            .at(1)
+            .text()
+        ).toEqual("purr");
+        expect(
+          page
+            .find("[data-test='whiskers']")
+            .at(0)
+            .text()
+        ).toEqual("soft");
+        expect(
+          page
+            .find("[data-test='whiskers']")
+            .at(1)
+            .text()
+        ).toEqual("bristly");
+      });
     });
   });
 
-  describe("Example 2", () => {
-    let title = "My House Building Project";
-    let formData = {
-      summary: {
-        bidReference: "ABC123",
-        projectTitle: "Project Dogs",
-        leadAuthority: "Count Cat",
-        jointBidAreas: "Down with the Dogs Co.",
-        projectDescription: "Cats only building",
-        greenOrBrownField: "Brownfield",
-        noOfHousingSites: "15",
-        totalArea: "28",
-        hifFundingAmount: "9876543",
-        descriptionOfInfrastructure: "Giant cat box",
-        descriptionOfWiderProjectDeliverables:
-          "Lots of scratching posts"
-      }
-    };
-    let page = new BaselinePage(title, formData);
+  describe("With dependancies", () => {
+    describe("Example 1", () => {
+      it("Displays the data appropriately", () => {
+        let schema = {
+          title: "person",
+          type: "object",
+          properties: {
+            meow: { type: "string", title: "Meow" }
+          },
+          dependencies: {
+            meow: {
+              oneOf: [
+                {
+                  properties: {
+                    meow: {
+                      enum: ["Yes"]
+                    },
+                    woof: {
+                      type: "string",
+                      title: "Woof"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        };
+        let data = {
+          meow: "Yes",
+          woof: "No"
+        };
+        let page = new BaselinePage(schema, data);
 
-    it("Displays the Project Name", () => {
-      expect(page.title()).toEqual("My House Building Project");
+        expect(page.find("[data-test='woof']").text()).toEqual("No");
+        expect(page.find("[data-test='title-woof']").text()).toEqual("Woof");
+      });
+
+      it("Displays the data appropriately with two oneOfs", () => {
+        let schema = {
+          title: "person",
+          type: "object",
+          properties: {
+            meow: { type: "string", title: "Meow" }
+          },
+          dependencies: {
+            meow: {
+              oneOf: [
+                {
+                  properties: {
+                    meow: {
+                      enum: ["Yes"]
+                    },
+                    woof: {
+                      type: "string",
+                      title: "Woof"
+                    }
+                  }
+                },
+                {
+                  properties: {
+                    meow: {
+                      enum: ["No"]
+                    },
+                    ribbit: {
+                      type: "string",
+                      title: "Ribbit"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        };
+        let data = {
+          meow: "No",
+          ribbit: "Croak"
+        };
+        let page = new BaselinePage(schema, data);
+
+        expect(page.find("[data-test='ribbit']").text()).toEqual("Croak");
+        expect(page.find("[data-test='title-ribbit']").text()).toEqual(
+          "Ribbit"
+        );
+        expect(page.find("[data-test='woof']").length).toEqual(0);
+      });
+
+      it("Displays the data appropriately with two dependencies", () => {
+        let schema = {
+          title: "person",
+          type: "object",
+          properties: {
+            meow: { type: "string", title: "Meow" },
+            croak: { type: "string", title: "Ribbit" }
+          },
+          dependencies: {
+            meow: {
+              oneOf: [
+                {
+                  properties: {
+                    meow: {
+                      enum: ["Yes"]
+                    },
+                    woof: {
+                      type: "string",
+                      title: "Woof"
+                    }
+                  }
+                }
+              ]
+            },
+            croak: {
+              oneOf: [
+                {
+                  properties: {
+                    croak: {
+                      enum: ["No"]
+                    },
+                    caw: {
+                      type: "string",
+                      title: "Bird Noise"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        };
+        let data = {
+          meow: "Yes",
+          woof: "No",
+          croak: "No",
+          caw: "Buckaw"
+        };
+        let page = new BaselinePage(schema, data);
+
+        expect(page.find("[data-test='caw']").text()).toEqual("Buckaw");
+        expect(page.find("[data-test='title-caw']").text()).toEqual("Bird Noise");
+      });
     });
 
-    it("Displays the summary", () => {
-      expect(page.summary("bidReference")).toEqual("ABC123");
-      expect(page.summary("projectTitle")).toEqual("Project Dogs");
-      expect(page.summary("leadAuthority")).toEqual("Count Cat");
-      expect(page.summary("jointBidAreas")).toEqual("Down with the Dogs Co.");
-      expect(page.summary("projectDescription")).toEqual("Cats only building");
-      expect(page.summary("greenOrBrownField")).toEqual("Brownfield");
-      expect(page.summary("noOfHousingSites")).toEqual("15");
-      expect(page.summary("totalArea")).toEqual("28");
-      expect(page.summary("hifFundingAmount")).toEqual("9876543");
-      expect(page.summary("descriptionOfInfrastructure")).toEqual(
-        "Giant cat box"
-      );
-      expect(page.summary("descriptionOfWiderProjectDeliverables")).toEqual(
-        "Lots of scratching posts"
-      );
+    describe("Example 2", () => {
+      it("Displays the data appropriately", () => {
+        let schema = {
+          title: "person",
+          type: "object",
+          properties: {
+            bark: { type: "string", title: "woofie" }
+          },
+          dependencies: {
+            bark: {
+              oneOf: [
+                {
+                  properties: {
+                    bark: {
+                      enum: ["Yes"]
+                    },
+                    shout: {
+                      type: "string",
+                      title: "Yelling"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        };
+        let data = {
+          bark: "Yes",
+          shout: "shhhh"
+        };
+        let page = new BaselinePage(schema, data);
+
+        expect(page.find("[data-test='shout']").text()).toEqual("shhhh");
+        expect(page.find("[data-test='title-shout']").text()).toEqual(
+          "Yelling"
+        );
+      });
+
+      it("Displays the data appropriately with two oneOfs", () => {
+        let schema = {
+          title: "person",
+          type: "object",
+          properties: {
+            cat: { type: "string", title: "run" }
+          },
+          dependencies: {
+            cat: {
+              oneOf: [
+                {
+                  properties: {
+                    cat: {
+                      enum: ["Yes"]
+                    },
+                    kitten: {
+                      type: "string",
+                      title: "little"
+                    }
+                  }
+                },
+                {
+                  properties: {
+                    cat: {
+                      enum: ["No"]
+                    },
+                    dog: {
+                      type: "string",
+                      title: "big"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        };
+        let data = {
+          cat: "No",
+          dog: "runs"
+        };
+        let page = new BaselinePage(schema, data);
+
+        expect(page.find("[data-test='dog']").text()).toEqual("runs");
+        expect(page.find("[data-test='title-dog']").text()).toEqual("big");
+        expect(page.find("[data-test='kitten']").length).toEqual(0);
+      });
     });
   });
 });

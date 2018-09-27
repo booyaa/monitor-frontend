@@ -1,51 +1,62 @@
 import React from "react";
 
 export default class BaselineData extends React.Component {
-  renderSummary() {
-    return (
-      <div>
-        <p data-test="summary-bidReference">
-          {this.props.formData.summary.bidReference}
-        </p>
-        <p data-test="summary-projectTitle">
-          {this.props.formData.summary.projectTitle}
-        </p>
-        <p data-test="summary-leadAuthority">
-          {this.props.formData.summary.leadAuthority}
-        </p>
-        <p data-test="summary-jointBidAreas">
-          {this.props.formData.summary.jointBidAreas}
-        </p>
-        <p data-test="summary-projectDescription">
-          {this.props.formData.summary.projectDescription}
-        </p>
-        <p data-test="summary-greenOrBrownField">
-          {this.props.formData.summary.greenOrBrownField}
-        </p>
-        <p data-test="summary-noOfHousingSites">
-          {this.props.formData.summary.noOfHousingSites}
-        </p>
-        <p data-test="summary-totalArea">
-          {this.props.formData.summary.totalArea}
-        </p>
-        <p data-test="summary-hifFundingAmount">
-          {this.props.formData.summary.hifFundingAmount}
-        </p>
-        <p data-test="summary-descriptionOfInfrastructure">
-          {this.props.formData.summary.descriptionOfInfrastructure}
-        </p>
-        <p data-test="summary-descriptionOfWiderProjectDeliverables">
-          {this.props.formData.summary.descriptionOfWiderProjectDeliverables}
-        </p>
-      </div>
-    );
-  }
+  renderObjectData = (obj, schema) => {
+    if (schema.type == "array") {
+      return obj.map(item => {
+        return this.renderObjectData(item, schema.items);
+      });
+    }
+    return Object.entries(obj).map(([key, value]) => {
+      let propertySchema = this.findInSchema(schema, key);
+      if (propertySchema.type == "object") {
+        return this.renderObjectData(obj[key], propertySchema);
+      } else {
+        return (
+          <div key={key}>
+            <h1 data-test={`title-${key}`}>{propertySchema.title}</h1>
+            <p data-test={key}>{value}</p>
+          </div>
+        );
+      }
+    });
+  };
+
+  findInSchema = (schema, key) => {
+    if (key in schema.properties) {
+      return schema.properties[key];
+    } else {
+      return this.findInDependencies(schema, key);
+    }
+  };
+
+  findInDependencies = (schema, key) => {
+    let allDependencies = Object.values(schema.dependencies);
+    let foundPropertySchema;
+    allDependencies.forEach(dependency => {
+      let properties = this.findInDependency(dependency, key);
+      if (properties) {
+        foundPropertySchema = properties;
+      }
+    });
+    return foundPropertySchema;
+  };
+
+  findInDependency = (dependency, key) => {
+    let dependencyOptions = dependency.oneOf;
+    let dependencyConditions = dependencyOptions.find(item => {
+      return key in item.properties;
+    });
+    if (dependencyConditions) {
+      return dependencyConditions.properties[key];
+    }
+  };
 
   render() {
     return (
       <div>
-        <p data-test="title">{this.props.title}</p>
-        {this.renderSummary()}
+        <p data-test="title">{this.props.schema.title}</p>
+        {this.renderObjectData(this.props.data, this.props.schema)}
       </div>
     );
   }
