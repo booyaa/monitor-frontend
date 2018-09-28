@@ -3,8 +3,8 @@ import BaselineData from ".";
 import { shallow, mount } from "enzyme";
 
 class BaselinePage {
-  constructor(schema, data) {
-    this.page = shallow(<BaselineData schema={schema} data={data} />);
+  constructor(schema, formData) {
+    this.page = shallow(<BaselineData schema={schema} formData={formData} />);
   }
 
   title() {
@@ -35,8 +35,8 @@ describe("Baseline Data", () => {
             }
           }
         };
-        let data = { firstItem: "This is number one " };
-        page = new BaselinePage(schema, data);
+        let formData = { firstItem: "This is number one " };
+        page = new BaselinePage(schema, formData);
       });
       it("Displays the Project Name", () => {
         expect(page.title()).toEqual("HIF Data");
@@ -70,8 +70,8 @@ describe("Baseline Data", () => {
             }
           }
         };
-        let data = { firstItem: "First String", secondItem: "Second String" };
-        let page2 = new BaselinePage(schema, data);
+        let formData = { firstItem: "First String", secondItem: "Second String" };
+        let page2 = new BaselinePage(schema, formData);
 
         expect(page2.find("[data-test='firstItem']").text()).toEqual(
           "First String"
@@ -95,8 +95,8 @@ describe("Baseline Data", () => {
             }
           }
         };
-        let data = { secondItem: "This is number three " };
-        page = new BaselinePage(schema, data);
+        let formData = { secondItem: "This is number three " };
+        page = new BaselinePage(schema, formData);
       });
       it("Displays the Project Name", () => {
         expect(page.title()).toEqual("My House Building Project");
@@ -130,8 +130,8 @@ describe("Baseline Data", () => {
             }
           }
         };
-        let data = { anotherItem: "Another One", catItem: "Cats!" };
-        let page = new BaselinePage(schema, data);
+        let formData = { anotherItem: "Another One", catItem: "Cats!" };
+        let page = new BaselinePage(schema, formData);
 
         expect(page.find("[data-test='anotherItem']").text()).toEqual(
           "Another One"
@@ -167,8 +167,8 @@ describe("Baseline Data", () => {
           bidReference: "1234",
           projectTitle: "Project Cats"
         };
-        let data = { summary };
-        let page = new BaselinePage(schema, data);
+        let formData = { summary };
+        let page = new BaselinePage(schema, formData);
         expect(page.find("[data-test='bidReference']").text()).toEqual("1234");
         expect(page.find("[data-test='projectTitle']").text()).toEqual(
           "Project Cats"
@@ -201,14 +201,14 @@ describe("Baseline Data", () => {
             }
           }
         };
-        let data = {
+        let formData = {
           overview: {
             hifFundingAmount: "9876543",
             descriptionOfInfrastructure: "Giant cat box",
             descriptionOfWiderProjectDeliverables: "Lots of scratching posts"
           }
         };
-        let page = new BaselinePage(schema, data);
+        let page = new BaselinePage(schema, formData);
         expect(page.find("[data-test='hifFundingAmount']").text()).toEqual(
           "9876543"
         );
@@ -267,8 +267,8 @@ describe("Baseline Data", () => {
         bar: "Hello",
         baz: "Goodbye"
       };
-      let data = { summary, foo };
-      let page = new BaselinePage(schema, data);
+      let formData = { summary, foo };
+      let page = new BaselinePage(schema, formData);
 
       expect(page.find("[data-test='bidReference']").text()).toEqual("1234");
       expect(page.find("[data-test='projectTitle']").text()).toEqual(
@@ -347,11 +347,11 @@ describe("Baseline Data", () => {
             }
           }
         };
-        let data = [
+        let formData = [
           { meow: "mew", whiskers: "soft" },
           { meow: "purr", whiskers: "bristly" }
         ];
-        let page = new BaselinePage(schema, data);
+        let page = new BaselinePage(schema, formData);
 
         expect(
           page
@@ -408,11 +408,11 @@ describe("Baseline Data", () => {
             }
           }
         };
-        let data = {
+        let formData = {
           meow: "Yes",
           woof: "No"
         };
-        let page = new BaselinePage(schema, data);
+        let page = new BaselinePage(schema, formData);
 
         expect(page.find("[data-test='woof']").text()).toEqual("No");
         expect(page.find("[data-test='title-woof']").text()).toEqual("Woof");
@@ -454,11 +454,11 @@ describe("Baseline Data", () => {
             }
           }
         };
-        let data = {
+        let formData = {
           meow: "No",
           ribbit: "Croak"
         };
-        let page = new BaselinePage(schema, data);
+        let page = new BaselinePage(schema, formData);
 
         expect(page.find("[data-test='ribbit']").text()).toEqual("Croak");
         expect(page.find("[data-test='title-ribbit']").text()).toEqual(
@@ -508,13 +508,13 @@ describe("Baseline Data", () => {
             }
           }
         };
-        let data = {
+        let formData = {
           meow: "Yes",
           woof: "No",
           croak: "No",
           caw: "Buckaw"
         };
-        let page = new BaselinePage(schema, data);
+        let page = new BaselinePage(schema, formData);
 
         expect(page.find("[data-test='caw']").text()).toEqual("Buckaw");
         expect(page.find("[data-test='title-caw']").text()).toEqual("Bird Noise");
@@ -547,11 +547,11 @@ describe("Baseline Data", () => {
             }
           }
         };
-        let data = {
+        let formData = {
           bark: "Yes",
           shout: "shhhh"
         };
-        let page = new BaselinePage(schema, data);
+        let page = new BaselinePage(schema, formData);
 
         expect(page.find("[data-test='shout']").text()).toEqual("shhhh");
         expect(page.find("[data-test='title-shout']").text()).toEqual(
@@ -595,11 +595,11 @@ describe("Baseline Data", () => {
             }
           }
         };
-        let data = {
+        let formData = {
           cat: "No",
           dog: "runs"
         };
-        let page = new BaselinePage(schema, data);
+        let page = new BaselinePage(schema, formData);
 
         expect(page.find("[data-test='dog']").text()).toEqual("runs");
         expect(page.find("[data-test='title-dog']").text()).toEqual("big");

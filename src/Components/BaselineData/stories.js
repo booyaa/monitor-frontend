@@ -32,7 +32,7 @@ storiesOf("Baseline Data", module).add("Default", () => {
           {
             properties: {
               croak: {
-                enum: ["Yes"]
+                enum: ["No"]
               },
               caw: {
                 type: "string",

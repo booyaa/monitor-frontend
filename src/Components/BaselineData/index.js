@@ -56,7 +56,7 @@ export default class BaselineData extends React.Component {
     return (
       <div>
         <p data-test="title">{this.props.schema.title}</p>
-        {this.renderObjectData(this.props.data, this.props.schema)}
+        {this.renderObjectData(this.props.formData, this.props.schema)}
       </div>
     );
   }
