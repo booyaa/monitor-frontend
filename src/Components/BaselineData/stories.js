@@ -44,11 +44,11 @@ storiesOf("Baseline Data", module).add("Default", () => {
       }
     }
   };
-  let data = {
+  let formData = {
     meow: "Yes",
     woof: "No",
     croak: "No",
     caw: "Buckaw"
   };
-  return <BaselineData schema={schema} data={data} />;
+  return <BaselineData schema={schema} formData={formData} />;
 });
