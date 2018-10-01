@@ -14,7 +14,7 @@ export default class BaselineData extends React.Component {
       } else {
         return (
           <div key={key}>
-            <h1 data-test={`title-${key}`}>{propertySchema.title}</h1>
+            <h4 data-test={`title-${key}`}>{propertySchema.title}</h4>
             <p data-test={key}>{value}</p>
           </div>
         );
@@ -54,9 +54,13 @@ export default class BaselineData extends React.Component {
 
   render() {
     return (
-      <div>
-        <p data-test="title">{this.props.schema.title}</p>
-        {this.renderObjectData(this.props.formData, this.props.schema)}
+      <div className="panel panel-default">
+        <div className="panel-heading">
+          <h2 data-test="title">{this.props.schema.title}</h2>
+        </div>
+        <div className="panel-body">
+          {this.renderObjectData(this.props.formData, this.props.schema)}
+        </div>
       </div>
     );
   }

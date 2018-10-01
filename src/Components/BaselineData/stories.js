@@ -5,7 +5,7 @@ import { storiesOf } from "@storybook/react";
 
 storiesOf("Baseline Data", module).add("Default", () => {
   let schema = {
-    title: "person",
+    title: "Person",
     type: "object",
     properties: {
       meow: { type: "string", title: "Meow" },
